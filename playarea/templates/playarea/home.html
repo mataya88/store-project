@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G.O.A.T</title>
+    <style href="home.css">
+        body {
+            text-align: center;
+        }
+        h1 {
+            color: blue;
+            border: solid 10px black;
+            padding: 10px;
+        }
+
+        p {
+            color: red;
+            border: dashed 5px yellow;
+        }
+    </style>
+    
+</head>
+<body>
+    {% if name %}
+    <h1>Hello to {{name}}</h1>
+    {%else%}
+    <h1>Hello to my website</h1>
+    {%endif%}
+    <strong>This is a strong website</strong>
+    <p>
+        Welcome to my website. This is a very great website.
+        Thank you for visiting.
+    </p>
+    
+</body>
+</html>
