@@ -11,13 +11,21 @@ class Category(models.Model):
                         related_name='+') 
                         # '+' will cancel the reverse relationship
 
+class Promotion(models.Model):
+    description = models.TextField()
+    discount = models.IntegerField()
+
+
 class Product(models.Model):
     title = models.CharField(max_length=255, blank=False, null=True)
     description = models.TextField(max_length=1000, blank=True, null=True)
-    price = models.DecimalField(decimal_places=3,blank=False, null=True,max_digits=6)
+    price = models.DecimalField(decimal_places=2,blank=False,
+                                 null=True,max_digits=6)
     inventory = models.PositiveIntegerField(blank=False, null=True)
-    last_update = models.DateTimeField(auto_now_add=True)
-    category = models.ForeignKey(Category, blank=True, null=True,on_delete=models.SET_NULL)
+    last_update = models.DateTimeField(auto_now=True)
+    promotions = models.ManyToManyField(Promotion)
+    category = models.ForeignKey(Category, blank=True, null=True,
+                                on_delete=models.SET_NULL)
     slug = models.SlugField()
 
 class Cart(models.Model):
@@ -41,13 +49,22 @@ class Customer(models.Model):
     membership = models.CharField(max_length=1,choices=MEMBERSHIP_CHOICES,
                  default=BRONZE)
 
+class Address(models.Model):
+    street = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, primary_key=True)
+
 class Order(models.Model):
     PENDING_STATUS = 'P'
     COMPLETE_STATUS = 'C'
     FAILED_STATUS = 'F'
-    STATUS_CHOICES = [(PENDING_STATUS,"Pending"),(COMPLETE_STATUS,"Complete"),(FAILED_STATUS,"Failed")]
+    STATUS_CHOICES = [(PENDING_STATUS,"Pending"),
+                      (COMPLETE_STATUS,"Complete"),
+                      (FAILED_STATUS,"Failed")]
+
     placed_at = models.DateField(auto_now_add=True)
     payment_status = models.CharField(max_length=1, choices= STATUS_CHOICES)
+    customer = models.ForeignKey(Customer,on_delete=models.CASCADE)
     
     
 
