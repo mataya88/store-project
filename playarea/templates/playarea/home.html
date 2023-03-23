@@ -28,11 +28,19 @@
     {%else%}
     <h1>Hello to my website</h1>
     {%endif%}
+
     <strong>This is a strong website</strong>
     <p>
         Welcome to my website. This is a very great website.
         Thank you for visiting.
     </p>
+    
+        {% for product in products %}
+        <li>
+        {{product.title}}
+        </li>
+        {% endfor %}
+    
     
 </body>
 </html>
