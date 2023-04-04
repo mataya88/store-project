@@ -37,10 +37,10 @@
     
         {% for product in products %}
         <li>
-        {{product.title}}
-        </li>
+        {{product.id}} - {{product.customer.first_name}}
+            </li>
         {% endfor %}
-    
+    <span>{{result}}</span>
     
 </body>
 </html>
