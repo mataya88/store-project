@@ -17,6 +17,10 @@ from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
 
+admin.site.site_header = 'Storeproject Administration'
+admin.site.index_title = 'Admin Page'
+admin.site.site_title = 'Storeproject Admin'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('playarea/',include("playarea.urls")),

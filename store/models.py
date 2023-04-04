@@ -21,6 +21,11 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     promotions = models.ManyToManyField(Promotion)
     slug = models.SlugField()
+
+    class Meta:
+        ordering = ['title'] # The default ordering for the admin page
+        verbose_name = 'MY PRODUCTS'
+        verbose_name_plural = 'THE PRODUCTS'
     
 class Customer(models.Model):
     BRONZE_MEMBERSHIP = 'B'
