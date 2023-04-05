@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
-from django.db.models import Count
+from django.db.models import Count, Value
+from django.db.models.functions import Concat
 from . import models
 from django.urls import reverse
 from django.utils.html import format_html, urlencode
@@ -64,7 +65,8 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(models.Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'count_product']
+    list_display = ['name','featured_product_title', 'count_product']
+    list_select_related = ['featured_product']
 
     @admin.display(ordering='count_product', description='products')
     def count_product(self, category: models.Category):
@@ -76,15 +78,25 @@ class CategoryAdmin(admin.ModelAdmin):
                 + urlencode({'category_id':str(category.id)}))
         return format_html('<a href={}>{}</a>',url,category.count_product)
 
+    @admin.display(ordering="featured_product__title")
+    def featured_product_title(self,category):
+        try:
+            return category.featured_product.title
+        except AttributeError:
+            return None
+
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(count_product=Count('product'))
+        return super().get_queryset(request).annotate(
+                                    count_product=Count('product'))
 
     
 
 
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'birth_date', 'membership']
+    list_display = ['first_name', 'last_name',
+                    'birth_date', 'membership',
+                    'total_orders']
     list_editable = ['membership']
     list_per_page = 10
     search_fields = ['first_name__istartswith',
@@ -93,14 +105,33 @@ class CustomerAdmin(admin.ModelAdmin):
 
     ordering = ['first_name', 'last_name']
 
+    @admin.display(ordering='total_orders')
+    def total_orders(self,customer):
+        url = (reverse('admin:store_order_changelist')
+                +'?'
+                + urlencode({'customer_id':str(customer.id)}))
+        return format_html('<a href={}>{}</a>',url,customer.total_orders)
+
+    def get_queryset(self, request):
+        return (super().get_queryset(request)
+                    .annotate(total_orders=Count('order__id')))
+
 
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['placed_at', 'payment_status', 'customer_name']
+    list_display = ['id','placed_at',
+                    'payment_status', 'customer_name']
     list_per_page = 10
     list_select_related = ['customer']
     search_fields = ['placed_at']
 
-    @admin.display(ordering="customer__first_name", description="customer")
+    @admin.display(
+        ordering=Concat("customer__first_name",
+                         Value(" "),
+                         "customer__last_name"),
+        description="customer")
     def customer_name(self, order):
+        
         return order.customer.first_name + ' ' + order.customer.last_name
+
+    
