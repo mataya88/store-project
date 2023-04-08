@@ -28,8 +28,25 @@ class InventoryFilter(admin.SimpleListFilter):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
-    fields=[('title','slug'),'category','last_update'] # fields in add form
-    readonly_fields=['last_update'] # auto fields must be readonly
+    # form lists
+    # fields=[('title','slug'),'category','last_update'] # fields in add form
+    # exclude = ['description'] # excluded fields in form
+    # readonly_fields=['last_update'] # auto fields must be readonly
+    # fieldsets = [
+    #     (None, {
+    #             'fields': ['title', 'slug']
+    #             }),
+    #     ('Category',{
+    #             'fields':('category',)
+    #     })]
+
+    # if you want a field not to be required in the form, make its blank=True in models.py
+    prepopulated_fields = {
+        'slug':['title']
+    }
+    autocomplete_fields = ['category']
+
+    # data lists
     list_display = ['title', 'unit_price', 'inventory',
                     'inventory_status', 'category_name', 'featured_product']
     list_editable = ['unit_price']
@@ -67,6 +84,7 @@ class ProductAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name','featured_product_title', 'count_product']
     list_select_related = ['featured_product']
+    search_fields = ['name']
 
     @admin.display(ordering='count_product', description='products')
     def count_product(self, category: models.Category):
@@ -117,13 +135,28 @@ class CustomerAdmin(admin.ModelAdmin):
                     .annotate(total_orders=Count('order__id')))
 
 
+class OrderItemInline(admin.TabularInline): # you can use StackedInline instead
+
+    # class to add orderitems in the order admin form
+    model = models.OrderItem
+    extra = 0 # number of rows displayed be default
+    min_num = 1 # minimum allowed childs
+    max_num = 3 # maximum allowed childs
+    fk_name = 'order'
+
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
+
+    autocomplete_fields = ['customer']
+    inlines = [OrderItemInline]
+
     list_display = ['id','placed_at',
                     'payment_status', 'customer_name']
     list_per_page = 10
     list_select_related = ['customer']
     search_fields = ['placed_at']
+
 
     @admin.display(
         ordering=Concat("customer__first_name",

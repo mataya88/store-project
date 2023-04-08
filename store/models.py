@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 class Promotion(models.Model):
     description = models.CharField(max_length=255) #TextField ok
@@ -11,12 +12,16 @@ class Category(models.Model):
         null = True, related_name='+'
     )
 
+    def __str__(self):
+        return self.name
+
 
 class Product(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    unit_price = models.DecimalField(max_digits=5, decimal_places=2)
-    inventory = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=5, decimal_places=2,
+                                     validators=[MinValueValidator(1)])
+    inventory = models.IntegerField(validators=[MinValueValidator(0)])
     last_update = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     promotions = models.ManyToManyField(Promotion)
@@ -49,6 +54,8 @@ class Customer(models.Model):
         )
     #address_set
  
+    def __str__(self):
+        return self.first_name + ' ' + self.last_name
  
 
 class Address(models.Model):
