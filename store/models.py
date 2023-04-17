@@ -31,6 +31,12 @@ class Product(models.Model):
         ordering = ['title'] # The default ordering for the admin page
         verbose_name = 'MY PRODUCTS'
         verbose_name_plural = 'THE PRODUCTS'
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    description = models.TextField()
+    reviewer_name = models.CharField(max_length=255)
+    date = models.DateField(auto_now_add=True)
     
 class Customer(models.Model):
     BRONZE_MEMBERSHIP = 'B'

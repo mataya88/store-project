@@ -9,6 +9,9 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+
+
 # Create your views here.
 
 # APIView provides handler methods (get, post, etc)
@@ -16,9 +19,21 @@ from django.shortcuts import get_object_or_404
 # generic views provide handlers
 # ViewSets provide actions
 
+
+class ReviewViewSet(ModelViewSet):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(product_id=self.kwargs['product_pk'])
+
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_pk']}
+
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['category_id', 'unit_price']
 
     def destroy(self, request, pk):
         if OrderItem.objects.filter(product=kwargs['pk']):
