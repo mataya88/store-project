@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from .serializers import *
 from .models import *
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -10,6 +10,9 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from .filters import ProductFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
+from.pagination import DefaultPagination
 
 
 # Create your views here.
@@ -32,8 +35,20 @@ class ReviewViewSet(ModelViewSet):
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['category_id', 'unit_price']
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    #filterset_fields = ['category_id', 'unit_price']
+    filterset_class = ProductFilter # custom filter
+    search_fields = ['^title', 'description'] 
+    # ^ means startswith, = means exact, defaul is icontains
+    ordering_fields = ['unit_price', 'category', 'last_update']
+    # you can put '__all__' but it is not recommended
+    pagination_class = DefaultPagination 
+
+    @action(detail=False, methods=['GET', 'POST']) 
+    # detail = True will put it in the detail page, otherwise in the list page
+    # if you put detail=True, pass id argument to custom function
+    def custom(self, product):
+        return Response('ok')
 
     def destroy(self, request, pk):
         if OrderItem.objects.filter(product=kwargs['pk']):
